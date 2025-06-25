@@ -1,9 +1,9 @@
-import Jogador from './Jogador'
+import Jogador from '../Jogador'
 import ControleTempoJogador from './ControleTempoJogador'
 import ConfiguracaoPartida from './ConfiguracaoPartida'
-import RetornoGenerico from './RetornoGenerico'
+import RetornoGenerico from '../RetornoGenerico'
 import RegistroPartida from './RegistroPartida'
-import Utils from './Utils'
+import Utils from '../Utils'
 
 export type Tabuleiro = (string | null)[][]
 export type Posicao = [number, number]
@@ -229,5 +229,4 @@ export default class Partida{
 
         return returnFunc
     }
-
 }

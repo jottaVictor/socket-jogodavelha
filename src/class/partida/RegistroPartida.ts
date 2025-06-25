@@ -1,4 +1,4 @@
-import Jogador from './Jogador'
+import Jogador from '../Jogador'
 import { Tabuleiro } from './Partida'
 
 export default class RegistroPartida{

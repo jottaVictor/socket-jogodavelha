@@ -1,9 +1,9 @@
-import ConfiguracaoPartida from "./ConfiguracaoPartida";
+import ConfiguracaoPartida from "../partida/ConfiguracaoPartida";
 import ConfiguracaoSala from "./ConfiguracaoSala";
-import Jogador from "./Jogador";
-import Partida from "./Partida";
-import RegistroPartida from "./RegistroPartida";
-import RetornoGenerico from "./RetornoGenerico";
+import Jogador from "../Jogador";
+import Partida from "../partida/Partida";
+import RegistroPartida from "../partida/RegistroPartida";
+import RetornoGenerico from "../RetornoGenerico";
 
 export default class Sala{
     #id: string
