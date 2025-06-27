@@ -2,7 +2,7 @@ export default class ConfiguracaoSala{
     #nomeSala: string
     #senha: string
     #idDono: string|null
-    #capacidadeMax: number
+    #maxJogadores: number
     
     get nomeSala(){
         return this.#nomeSala
@@ -16,15 +16,15 @@ export default class ConfiguracaoSala{
         return this.#senha
     }
 
-    get capacidadeMax(){
-        return this.#capacidadeMax
+    get maxJogadores(){
+        return this.#maxJogadores
     }
     
-    constructor(nomeSala: string, senha: string, idDono: string|null, capacidadeMax: number){
+    constructor(nomeSala: string, senha: string, idDono: string|null, maxJogadores: number){
         this.#nomeSala = nomeSala
         this.#senha = senha
         this.#idDono = idDono
-        this.#capacidadeMax = capacidadeMax
+        this.#maxJogadores = maxJogadores
     }
 
     public publica(){

@@ -17,8 +17,7 @@ test("jogadas sendo feitas e registro de tabuleiro e tempos funcionando funciona
     setTimeout(() => {
         partida.processaJogada(jogador2, [1, 2])
 
-        console.log(partida.registroPartida.temposGastos[4])
-        expect(partida.registroPartida.temposGastos[4] > 200).toBe(true)
+        expect(partida.registroPartida.temposGastos[4] >= 200).toBe(true)
         done()
     }, 200)
 

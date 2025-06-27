@@ -1,7 +1,7 @@
 import Utils from '../dist/src/class/Utils'
 import Jogador from "../dist/src/class/Jogador"
-import Partida from '../dist/src/class/Partida'
-import configPartida from '../dist/src/class/ConfiguracaoPartida'
+import Partida from '../dist/src/class/partida/Partida'
+import configPartida from '../dist/src/class/partida/ConfiguracaoPartida'
 
 const jogador1 = new Jogador(Utils.gerarId(), "Jogador n1", "https://olamundo.com")
 const jogador2 = new Jogador(Utils.gerarId(), "Jogador n2", "https://olamundo.com")

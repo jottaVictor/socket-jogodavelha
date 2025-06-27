@@ -1,3 +1,4 @@
+import { WebSocket } from "ws";
 import ConfiguracaoPartida from "../partida/ConfiguracaoPartida";
 import ConfiguracaoSala from "./ConfiguracaoSala";
 import Jogador from "../Jogador";
@@ -8,18 +9,33 @@ import RetornoGenerico from "../RetornoGenerico";
 export default class Sala{
     #id: string
     #configuracaoSala: ConfiguracaoSala
+    #websockets: { [id: string]: WebSocket }
     #jogadores: { [id: string]: Jogador } = {}
     #placar: { [id: string]: number } = {}
     #registroPartidas: { [id: string]: RegistroPartida } = {}
     #partidaAtual: Partida|null = null
 
+    get id(){
+        return this.#id
+    }
+
+    get webSockets(){
+        return this.#websockets
+    }
+
     constructor(id: string, configSala: ConfiguracaoSala){
         this.#id = id
         this.#configuracaoSala = configSala
+        this.#websockets = {}
     }
 
-    public adicionaJogador(jogador: Jogador){
+    public adicionaJogador(ws: WebSocket, jogador: Jogador){
         if(!this.estaCheia() && !this.#jogadores[jogador.id]){
+            (ws as any).serverData = {
+                'idSala': this.id,
+                'jogador': jogador
+            }
+            this.#websockets[jogador.id] = ws
             this.#jogadores[jogador.id] = jogador
             this.#placar[jogador.id] = 0
         }
@@ -27,13 +43,15 @@ export default class Sala{
 
     public removeJogador(jogador: Jogador){
         if(this.#jogadores[jogador.id]){
+            delete (this.#websockets[jogador.id] as any).serverData
+            delete this.#websockets[jogador.id]
             delete this.#jogadores[jogador.id]
             delete this.#placar[jogador.id]
         }
     }
 
     public setDono(jogador: Jogador){
-        const newConfig = new ConfiguracaoSala(this.#configuracaoSala.nomeSala, this.#configuracaoSala.senha, jogador.id, this.#configuracaoSala.capacidadeMax)
+        const newConfig = new ConfiguracaoSala(this.#configuracaoSala.nomeSala, this.#configuracaoSala.senha, jogador.id, this.#configuracaoSala.maxJogadores)
         return this.#configuracaoSala = newConfig
     }
 
@@ -42,7 +60,7 @@ export default class Sala{
     }
 
     public estaCheia(){
-        return this.countJogadores() == this.#configuracaoSala.capacidadeMax
+        return this.countJogadores() == this.#configuracaoSala.maxJogadores
     }
 
     public setConfiguracaoSala(configuracaoSala: ConfiguracaoSala){
