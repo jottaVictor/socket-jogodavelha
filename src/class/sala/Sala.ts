@@ -23,6 +23,10 @@ export default class Sala{
         return this.#websockets
     }
 
+    get jogadores(){
+        return this.#jogadores
+    }
+
     constructor(id: string, configSala: ConfiguracaoSala){
         this.#id = id
         this.#configuracaoSala = configSala

@@ -10,68 +10,84 @@ import ConsoleLogger from "./ConsoleLogger"
 import Mensagem from "./Mensagem"
 
 export default class ServerSocketJogoDaVelha{
-    #serverSocket: WebSocketServer
+    #serverWebSocket: WebSocketServer
     #ouvintes: { [tipoMensagem: string]: Ouvinte }
     #salas: { [id: string]: Sala }
+
+    get salas(){
+        return this.#salas
+    }
 
     constructor(ouvintes: { [tipoMensagem: string]: Ouvinte }, port: number){
         this.#ouvintes = ouvintes
         this.#salas = {}
-        this.#serverSocket = new WebSocketServer({port})
+        this.#serverWebSocket = new WebSocketServer({port})
+
+        this.setServerEmOuvintes()
+    }
+
+    private setServerEmOuvintes(){
+        for(const [id, ouvinte] of Object.entries(this.#ouvintes)){
+            ouvinte.setServerSocketJogoDaVelha(this)
+        }
     }
 
     public setupServer(){
-        this.#serverSocket.on('connection', (ws: WebSocket, req: any) => {
+        this.#serverWebSocket.on('connection', (ws: WebSocket, req: any) => {
             ws.on('message', (message: any) => {
                 let mensagemRecebida = JSON.parse(message.toString())
-                
-                let _consoleLogger = new ConsoleLogger()
-                _consoleLogger.mensagemRecebida = mensagemRecebida
-
                 try{
-                    this.processaMensagem(ws, mensagemRecebida, _consoleLogger)
+                    this.processaMensagem(ws, mensagemRecebida)
                 }catch (error){
-                    _consoleLogger.logError(error)
+                    const _log = new ConsoleLogger()
+                    _log.mensagemRecebida = mensagemRecebida
+                    _log.logError(error)
                 }
             })
         })
     }
     
-    public processaMensagem(ws: WebSocket, mensagem: any, _consoleLogger: ConsoleLogger){
-        if(!this.#ouvintes[mensagem.tipo]){
+    public processaMensagem(ws: WebSocket, mensagem: any){
+        if(!this.#ouvintes[mensagem.tipo])
             throw new Error("Não há resposta para a mensagem do tipo: " + mensagem.tipo)
-        }
 
         const respostaServer = this.#ouvintes[mensagem.tipo].ouve(ws, mensagem)
-
-        // if(respostaServer)
-
+        
+        if(respostaServer === undefined)
+            throw new Error("Sem resposta para essa mensagem")
     }
 
-    public enviaMensagemParaTodosDaSala(ws: WebSocket, mensagem: Mensagem, _consoleLogger: ConsoleLogger){
+    public enviaMensagemParaTodosDaSala(ws: WebSocket, mensagemRecebida: Mensagem, mensagemRespota: Mensagem){
         const _ws = ws as any
-        if(_ws.idSala !== null){
-            _consoleLogger.mensagemRespota = mensagem
+        if(_ws.dadosServer?.idSala !== null){
+            const _consoleLogger = new ConsoleLogger()
+            _consoleLogger.mensagemRecebida = mensagemRecebida
+            _consoleLogger.mensagemRespota = mensagemRespota
             _consoleLogger.paraTodosDaSala = true
 
-            const socketSala = this.#salas[_ws.idSala].webSockets
+            const socketSala = this.#salas[_ws.dadosServer.idSala].webSockets
             for(const [id, socket] of Object.entries(socketSala)){
-                socket.send(JSON.stringify(mensagem))
+                socket.send(JSON.stringify(mensagemRespota))
             }
 
             _consoleLogger.log()
         }
     }
 
-    public enviaMensagem(ws: WebSocket, mensagem: Mensagem, _consoleLogger: ConsoleLogger){
-        ws.send(JSON.stringify(mensagem))
-        _consoleLogger.mensagemRespota = mensagem
+    public enviaMensagem(ws: WebSocket, mensagemRecebida: Mensagem, mensagemRespota: Mensagem, ){
+        ws.send(JSON.stringify(mensagemRespota))
+        const _consoleLogger = new ConsoleLogger()
+        _consoleLogger.mensagemRecebida = mensagemRecebida
+        _consoleLogger.mensagemRespota = mensagemRespota
+        _consoleLogger.paraTodosDaSala = true
         _consoleLogger.log()
     }
 
     public criaSala(configuracaoSala: ConfiguracaoSala){
         const sala = new Sala(Utils.gerarId(), configuracaoSala)
         this.#salas[sala.id] = sala
+
+        return sala.id
     }
 
     public removerJogadorDeSala(jogador: Jogador){
